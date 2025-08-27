@@ -3,6 +3,9 @@ Track events that need to be supported:
 N (note)
 B (tempo change)
 Track events that are supported:
+N
+B
+S
 */
 //Reads song data
 class ChartReader {
@@ -99,7 +102,6 @@ class ChartReader {
          * @returns {Number|undefined}
          */
         const getTempo = function (val) {
-
             let tempo = 0;
             if (this.#getEventType(val) == "B") {
                 let eventMod = this.#getEventMod(val);
@@ -142,7 +144,8 @@ class ChartReader {
     process() {
         if (this.processRun) {
             console.warn(`WARN: this.process should only be run once!
-                If for some reason you want to run it again, set this.overrideProcessRunLimit to true, but know that this is highly discouraged`)
+If for some reason you want to run it again, set this.overrideProcessRunLimit to true, but know that this is highly discouraged`)
+            return
         }
         this.processRun = true;
         /**
@@ -305,11 +308,92 @@ class ChartReader {
             noteList[i].time = noteMSList[i];
         }
         let phraseMSList = this.convertTickListToMilliseconds(phraseTickList);
-         for (let i = 0; i < phraseMSList.length; i++) {
+        for (let i = 0; i < phraseMSList.length; i++) {
             phraseList[i].time = phraseMSList[i];
         }
         this.noteList = noteList;
         this.phraseList = phraseList;
-        return(noteList)
+        return (noteList)
+    }
+    /**
+     * @typedef {Object} chord
+     * @property {Number} tick
+     * @property {Number} time
+     * @property {Number} phrase
+     * @property {Boolean} special
+     * @property {Boolean} HOPO
+     * @property {Boolean} tap
+     * @property {Array<note>} notes
+     */
+    getChords() {
+        let currentTick = 0;
+        let currentChord = { "tick": -1, "time": -1, "phrase": -1, "special": false, "HOPO": false, "tap": false, "notes": [] }
+        const chordTemplate = { "tick": -1, "time": -1, "phrase": -1, "special": false, "HOPO": false, "tap": false, "notes": [] }
+        /** @type {Array<chord>} */
+        let chordList = [];
+        const handleNote = (note) => {
+            currentChord.notes.push(note);
+            currentChord.tick = note.tick;
+            currentChord.time = note.time;
+            currentChord.phrase = note.phrase;
+            currentChord.special = note.special;
+            currentChord.HOPO = note.HOPO;
+            currentChord.tap = note.tap;
+
+        }
+        for (let i = 0; i < this.noteList.length; i++) {
+            let thisNote = this.noteList[i];
+            if (this.noteList[i].tick != currentTick) {
+                chordList.push(currentChord)
+                currentTick = thisNote.tick;
+                currentChord = chordTemplate;
+            }
+            handleNote(thisNote);
+        }
+        this.chordList = chordList;
+    }
+    debug = {
+        "logNotes": () => {
+            //star: 
+            // tap☆
+            // HOPO✬
+            // norm★
+            //norm:
+            // tap◯
+            // HOPO⦿
+            // norm⬤
+            if (!this.chordList) {
+                console.error("this.chordlist is falsy")
+                return
+            }
+            let highway = "";
+            for (let i = 0; i < this.chordList.length; i++) {
+                let thisChord = this.chordList[i];
+                let symbol = "";
+                if (thisChord.special) {
+                    if (thisChord.tap) {
+                        symbol = "☆"
+                    } else if (thisChord.HOPO) {
+                        symbol = "✬"
+                    } else {
+                        symbol = "★"
+                    }
+                } else {
+                    if (thisChord.tap) {
+                        symbol = "◯"
+                    } else if (thisChord.HOPO) {
+                        symbol = "⦿"
+                    } else {
+                        symbol = "⬤"
+                    }
+                }
+                let line = "......\n";
+                for (let j = 0; j < thisChord.notes.length; j++) {
+                    line[thisChord.notes[j].button] = symbol;
+                }
+                highway+=line;
+            }
+
+        }
     }
 }
