@@ -35,15 +35,7 @@ class ChartReader {
     #getSectionData(sectionName) {
         const dataRegexTemplate = "(?<=\\[<sectionName>\\]\\n\\{\\n)(.|\\n)*?(?=\\n\\})";
         const dataRegex = new RegExp(dataRegexTemplate.replace("<sectionName>", sectionName), "gm")
-        console.log(dataRegex);
-
         let matches = this.data.toString().replaceAll("\r", "").match(dataRegex)
-        // while((matches = dataRegex.exec(this.data.toString().replaceAll("\r",""))) !== null){
-        //     if(matches.index === dataRegex.lastIndex){
-        //         dataRegex.lastIndex++
-        //     }
-        // }
-        console.log(matches)
         return (matches);
     }
     /**
@@ -52,7 +44,6 @@ class ChartReader {
      * @returns {Array<String>}
      */
     #getKVpair(line) {
-        console.log("|" + line + "|");
         const keyRegex = /(?<=^([\t| ])*)\w+(?=( )*=)/gm
         const valRegex = RegExp("(?<=^([\\t| ])*\\w+( )*=( )*)[^ \\n][^\\n]*")
         return ([line.match(keyRegex)[0], line.match(valRegex)[0]])
@@ -126,7 +117,6 @@ class ChartReader {
          * @returns {Number|undefined}
          */
         const getTempo = (val) => {
-
             if (this.#getEventType(val) == "B") {
                 let eventMod = this.#getEventMod(val);
                 if (isFinite(eventMod)) {
@@ -144,16 +134,10 @@ class ChartReader {
         }
         for (let i = 0; i < this.syncTrackEL.valArr.length; i++) {
             while (this.syncTrackEL.tickArr[i] >= currentTickList[0]) {
-                // secList.push(currentTime + (((currentTickList[0] - currentTick / this.resolution) / tempo) * 60000))
                 secList.push(currentTime +this.convertTickDurationToMS((currentTickList[0]-currentTick),tempo))
-
                 currentTickList.splice(0, 1);
             }
-            // if (this.syncTrackEL.tickArr[i] >= ticks) {
-            //     return (currentTime + (((ticks - currentTick / this.resolution) / tempo) * 60000));
-            // }
             if (getTempo(this.syncTrackEL.valArr[i])) {
-                // currentTime += (((this.syncTrackEL.tickArr[i] - currentTick / this.resolution) / tempo) * 60000);
                 currentTime+=this.convertTickDurationToMS(this.syncTrackEL.tickArr[i]-currentTick,tempo)
                 currentTick = this.syncTrackEL.tickArr[i];
                 tempo = getTempo(this.syncTrackEL.valArr[i]);
@@ -181,17 +165,13 @@ If for some reason you want to run it again, set this.overrideProcessRunLimit to
          * @returns {eventList}
          */
         const processSection = (section) => {
-
             let matches = this.#getSectionData(section);
-            console.log(matches)
             let lines = matches[0].split("\n");
             let indexArr = [];
             let tickArr = [];
             let valArr = [];
             for (let i = 0; i < lines.length; i++) {
                 if (lines[i]) {
-
-
                     let kvPair = this.#getKVpair(lines[i]);
                     let key = kvPair[0];
                     let val = kvPair[1];
@@ -204,9 +184,7 @@ If for some reason you want to run it again, set this.overrideProcessRunLimit to
                         }
                         tickArr.push(keyNum);
                         valArr.push(val);
-
                     }
-
                 }
             }
             return ({
@@ -215,10 +193,8 @@ If for some reason you want to run it again, set this.overrideProcessRunLimit to
                 "valArr": valArr
             })
         }
-
         this.syncTrackEL = processSection("SyncTrack");
         this.eventEL = processSection("Events");
-
         this.mainTrackEL = processSection(this.targetTrack);
         let songSection = this.#getSectionData("Song")[0].split("\n");
         for (let i = 0; i < songSection.length; i++) {
@@ -281,13 +257,12 @@ If for some reason you want to run it again, set this.overrideProcessRunLimit to
         let tickNotes = [];
         let tickModifiers = { "tap": false, "HOPO": false }
         /**
-         * 
+         *
          * @param {String} val 
          * @param {Number} tick 
          * @returns {void}
          */
         const readEv = (val, tick) => {
-            console.log(val)
             let type = this.#getEventType(val);
             let mod = this.#getEventMod(val);
             let inPhrase = (currentPhraseStart + currentPhraseDuration > tick && currentPhraseStart <= tick);
@@ -382,18 +357,13 @@ If for some reason you want to run it again, set this.overrideProcessRunLimit to
             currentChord.special = note.special;
             currentChord.HOPO = note.HOPO;
             currentChord.tap = note.tap;
-
         }
         for (let i = 0; i < this.noteList.length; i++) {
             let thisNote = this.noteList[i];
             if (this.noteList[i].tick != currentTick) {
-                console.log("new chord")
                 chordList.push(delink(currentChord))
                 currentTick = thisNote.tick;
-                console.log("1: " + currentChord.notes.length)
                 currentChord = delink(chordTemplate);
-                console.log("2: " + currentChord.notes.length)
-
             }
             handleNote(thisNote);
         }
@@ -435,7 +405,6 @@ If for some reason you want to run it again, set this.overrideProcessRunLimit to
                     }
                 }
                 let line = "..........";
-
                 const replaceAt = (str, index, val) => {
                     let retStr = str.split('')
                     retStr[index] = val;
@@ -454,30 +423,30 @@ If for some reason you want to run it again, set this.overrideProcessRunLimit to
 
 
 //TESTING
-function download(filename, text) {
-    var element = document.createElement('a');
-    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-    element.setAttribute('download', filename);
-    element.innerText = "Download"
-    // element.style.display = 'none';
-    document.body.appendChild(element);
+// function download(filename, text) {
+//     var element = document.createElement('a');
+//     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+//     element.setAttribute('download', filename);
+//     element.innerText = "Download"
+//     // element.style.display = 'none';
+//     document.body.appendChild(element);
 
-    // element.click();
+//     // element.click();
 
-    // document.body.removeChild(element);
-}
-let tc;
-fetch("/references/Shine/Shine/notes.chart").then((res) => res.text()).then((text) => {
-    console.log(text.length)
-    tc = new ChartReader(text, "ExpertSingle");
-    console.log("process")
-    tc.process()
-    console.log("getNotes")
-    tc.getNotes()
-    console.log("getChords")
-    tc.getChords()
-    console.log("logNotes")
-    let notes = tc.debug.logNotes();
-    console.log("download")
-    download("notes.txt", notes);
-})
+//     // document.body.removeChild(element);
+// }
+// let tc;
+// fetch("/references/Shine/Shine/notes.chart").then((res) => res.text()).then((text) => {
+//     console.log(text.length)
+//     tc = new ChartReader(text, "ExpertSingle");
+//     console.log("process")
+//     tc.process()
+//     console.log("getNotes")
+//     tc.getNotes()
+//     console.log("getChords")
+//     tc.getChords()
+//     console.log("logNotes")
+//     let notes = tc.debug.logNotes();
+//     console.log("download")
+//     download("notes.txt", notes);
+// })
