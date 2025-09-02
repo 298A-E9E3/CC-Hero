@@ -1,3 +1,4 @@
+
 /*
 Track events that need to be supported:
 N (note)
@@ -19,10 +20,8 @@ class ChartReader {
      * 
      * @param {String} data The contents of the .chart file
      * @param {String} targetTrack A string in the format <Difficulty><Instrument> specifying which track should be read
-     * @returns {void}
      */
     constructor(data, targetTrack) {
-        //MOTHERFUCKING CARRIAGE RETURNS!!! THIS TOOK ME AN HOUR TO FIX
         this.data = data.replaceAll("\r", "");
         this.targetTrack = targetTrack;
         this.overrideProcessRunLimit = false;
@@ -87,7 +86,7 @@ class ChartReader {
     /**
      * Converts a list of ticks into milliseconds
      * @param {Array<Number>} noteTickList 
-     * @returns {Array<Number>}
+     * @returns {Array<Number>|void}
      */
     convertTickListToMilliseconds(noteTickList) {
         if (!this.syncTrackEL) {
@@ -269,7 +268,7 @@ If for some reason you want to run it again, set this.overrideProcessRunLimit to
             switch (type) {
                 case "N": {
                     let mods = mod.split(" ");
-                    if (mods[0] !== 5 && mods[0] !== 6) {
+                    if (mods[0] != 5 && mods[0] != 6) {
                         let note = { "time": -1, "tick": tick, "duration": mods[1], "button": mods[0], "tap": false, "HOPO": false, "special": inPhrase && (currentPhraseType == 2), "phrase": inPhrase ? currentPhraseIndex : -1 }
                         tickNotes.push(note);
                     } else {
@@ -369,6 +368,7 @@ If for some reason you want to run it again, set this.overrideProcessRunLimit to
         }
         this.chordList = chordList;
     }
+
     debug = {
         "logNotes": () => {
             //star: 
@@ -418,6 +418,11 @@ If for some reason you want to run it again, set this.overrideProcessRunLimit to
             return (highway)
 
         }
+    }
+    setup(){
+        this.process();
+        this.getNotes();
+        this.getChords();
     }
 }
 
