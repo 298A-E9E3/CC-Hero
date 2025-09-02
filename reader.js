@@ -153,7 +153,7 @@ class ChartReader {
      */
     process() {
         if (this.processRun) {
-            console.warn(`WARN: this.process should only be run once!
+            console.warn(`this.process should only be run once!
 If for some reason you want to run it again, set this.overrideProcessRunLimit to true, but know that this is highly discouraged`)
             return
         }
@@ -229,7 +229,7 @@ If for some reason you want to run it again, set this.overrideProcessRunLimit to
      */
     getNotes() {
         if (this.getNotesRun) {
-            console.warn("WARN: it is not recommended to run this.getNotes more than once, as it is slow");
+            console.warn("It is not recommended to run this.getNotes more than once, as it is slow");
         }
         this.getNotesRun = true;
         if (!this.resolution) {
