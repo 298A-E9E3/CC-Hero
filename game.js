@@ -15,11 +15,21 @@ class gameInstance {
         this.time = 0;
         this.deltaTime = 0;
     }
-    initiateStep(deltaTime) {
-        this.time += deltaTime;
+    initiateStep(time, deltaTime) {
+        this.time = time;
         this.deltaTime = deltaTime;
+        let firstNote = helpers.findNearest(this.chart.chordList, time);
+        let firstIndex = this.chart.chordList.indexOf(firstNote);
+        if (firstIndex == -1) {
+            console.error("firstNote is not in this.chart.chordList");
+            return
+        }
+        
+        for (let i = firstIndex; i < this.chart.chordList.length; i++) {
+
+        }
     }
-    
+
     /**
      * Checks to see which notes were hit, then adds the hit notes to a temporary array
      */
